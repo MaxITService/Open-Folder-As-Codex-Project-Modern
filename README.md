@@ -3,6 +3,8 @@
 Local-admin/dev helper for adding **Open project in Codex** to the Windows 11
 modern context menu.
 
+![Open project in Codex in the Windows 11 modern context menu](<Media-GitHub/how it works modern menu.png>)
+
 It uses the Windows 11-supported shape:
 
 - a native `IExplorerCommand` shell extension DLL,
@@ -12,27 +14,16 @@ It uses the Windows 11-supported shape:
 
 ## Install
 
-Run from an elevated Developer Command Prompt or elevated PowerShell:
+Right-click **Install-Win11ModernContextMenu.bat** and choose **Run as administrator**.
 
 ```cmd
 Install-Win11ModernContextMenu.bat
 ```
 
-The batch file keeps the console open and writes a log to
-`artifacts\install.log`.
-
-The script will:
-
-1. find Codex Desktop, or use `-CodexExe`,
-2. generate and trust a local self-signed certificate,
-3. build the shell extension DLL with MSBuild,
-4. render the package manifest,
-5. create and sign the MSIX with `MakeAppx.exe` and `SignTool.exe`,
-6. install the package with `Add-AppxPackage`,
-7. restart Explorer.
-
 If the package is already installed, the installer asks whether to uninstall,
 reinstall/update, or cancel.
+
+The installer keeps the console open and writes a log to `artifacts\install.log`.
 
 ## Useful options
 
@@ -45,6 +36,18 @@ Install-Win11ModernContextMenu.bat -Uninstall
 
 `x64` is the default platform. `-Platform ARM64` is available for Windows on
 ARM devices. There is no 32-bit build.
+
+## What It Does
+
+The installer:
+
+1. finds Codex Desktop, or uses `-CodexExe`,
+2. generates and trusts a local self-signed certificate,
+3. builds the shell extension DLL with MSBuild,
+4. renders the package manifest,
+5. creates and signs the MSIX with `MakeAppx.exe` and `SignTool.exe`,
+6. installs the package with `Add-AppxPackage`,
+7. restarts Explorer.
 
 ## Requirements
 
@@ -77,10 +80,10 @@ ARM devices. There is no 32-bit build.
 
 ## Related Version
 
-Want the simpler registry-based classic menu version?
-Use the separate classic package:
+This is the native Windows 11 modern-menu version.
 
-[Open-Folder-As-Codex-Project](https://github.com/MaxITService/Open-Folder-As-Codex-Project)
+Want the simpler registry-based classic menu version?
+Use [Open-Folder-As-Codex-Project](https://github.com/MaxITService/Open-Folder-As-Codex-Project).
 
 ## License
 
