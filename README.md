@@ -14,7 +14,9 @@ It uses the Windows 11-supported shape:
 
 ## Install
 
-Right-click **Install-Win11ModernContextMenu.bat** and choose **Run as administrator**.
+Run **Install-Win11ModernContextMenu.bat**.
+
+It asks for administrator rights automatically when needed.
 
 ```cmd
 Install-Win11ModernContextMenu.bat
