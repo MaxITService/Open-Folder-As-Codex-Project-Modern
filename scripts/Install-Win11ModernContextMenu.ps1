@@ -30,6 +30,9 @@ $clsid = '5f220f1e-376f-4f5b-9d5e-d42d924ff811'
 $appId = '2d737260-9d21-44d1-89a7-e50f438da3c3'
 $settingsKey = 'HKCU:\Software\OpenFolderAsCodexProject\Win11Modern'
 $pfxPassword = ConvertTo-SecureString -String 'OpenFolderAsCodexProject-Dev' -Force -AsPlainText
+$codexInstallUrl = 'https://apps.microsoft.com/detail/9plm9xgg6vks'
+$buildToolsUrl = 'https://visualstudio.microsoft.com/visual-cpp-build-tools/'
+$windowsSdkUrl = 'https://developer.microsoft.com/windows/downloads/windows-sdk/'
 
 function Test-IsAdmin {
     $principal = [Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -83,9 +86,9 @@ function Find-VsWhere {
 
 function Find-MSBuild {
     $vswhere = Find-VsWhere
-    $path = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\Current\Bin\MSBuild.exe' | Select-Object -First 1
+    $path = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find 'MSBuild\Current\Bin\MSBuild.exe' | Select-Object -First 1
     if (-not $path -or -not (Test-Path -LiteralPath $path -PathType Leaf)) {
-        throw 'Could not find MSBuild.exe. Install Visual Studio 2022 Build Tools.'
+        throw 'Could not find MSBuild.exe with the MSVC C++ toolset. Install Visual Studio Build Tools for C++.'
     }
     return $path
 }
@@ -108,6 +111,77 @@ function Find-WindowsSdkTool {
         throw "Could not find $ToolName in the Windows SDK."
     }
     return $tool
+}
+
+function Test-Dependencies {
+    param([string] $ExplicitCodexExe)
+
+    Write-Host 'Checking dependencies...'
+    $missing = New-Object System.Collections.Generic.List[string]
+
+    try {
+        $codexPath = Get-CodexDesktopExe -ExplicitPath $ExplicitCodexExe
+        Write-Host "  OK Codex Desktop: $codexPath"
+    }
+    catch {
+        $missing.Add('Codex Desktop')
+    }
+
+    try {
+        $msbuild = Find-MSBuild
+        Write-Host "  OK Visual Studio C++ Build Tools: $msbuild"
+    }
+    catch {
+        $missing.Add('Visual Studio C++ Build Tools')
+    }
+
+    $missingSdk = $false
+    try {
+        $makeAppx = Find-WindowsSdkTool -ToolName 'MakeAppx.exe'
+        Write-Host "  OK MakeAppx.exe: $makeAppx"
+    }
+    catch {
+        $missingSdk = $true
+    }
+
+    try {
+        $signTool = Find-WindowsSdkTool -ToolName 'SignTool.exe'
+        Write-Host "  OK SignTool.exe: $signTool"
+    }
+    catch {
+        $missingSdk = $true
+    }
+
+    if ($missingSdk) {
+        $missing.Add('Windows SDK')
+    }
+
+    if ($missing.Count -eq 0) {
+        Write-Host 'Dependency check passed.'
+        return
+    }
+
+    Write-Host ''
+    Write-Host 'Missing required dependencies:'
+    foreach ($item in $missing) {
+        Write-Host "  - $item"
+    }
+
+    Write-Host ''
+    Write-Host 'Install links:'
+    if ($missing.Contains('Codex Desktop')) {
+        Write-Host "  Codex Desktop: $codexInstallUrl"
+    }
+    if ($missing.Contains('Visual Studio C++ Build Tools')) {
+        Write-Host "  Visual Studio Build Tools for C++: $buildToolsUrl"
+        Write-Host '    Select the C++ build tools / Desktop development with C++ components.'
+    }
+    if ($missing.Contains('Windows SDK')) {
+        Write-Host "  Windows SDK: $windowsSdkUrl"
+        Write-Host '    The SDK provides MakeAppx.exe and SignTool.exe.'
+    }
+
+    throw 'Install the missing dependencies and run this installer again.'
 }
 
 function Ensure-DevCertificate {
@@ -305,6 +379,8 @@ if ($installedPackage) {
         }
     }
 }
+
+Test-Dependencies -ExplicitCodexExe $CodexExe
 
 $codexDesktopExe = Get-CodexDesktopExe -ExplicitPath $CodexExe
 New-Item -ItemType Directory -Force -Path $artifactsRoot | Out-Null

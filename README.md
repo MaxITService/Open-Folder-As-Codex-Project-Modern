@@ -14,16 +14,25 @@ It uses the Windows 11-supported shape:
 
 ## Install
 
-Run **Install-Win11ModernContextMenu.bat**.
+Run **Install-Win11ModernContextMenu.bat**:
 
-It asks for administrator rights automatically when needed.
 
 ```cmd
 Install-Win11ModernContextMenu.bat
 ```
+---
+
+## Uninstall
+
+Run **Install-Win11ModernContextMenu.bat** again.
+
+It asks for administrator rights automatically when needed.
 
 If the package is already installed, the installer asks whether to uninstall,
 reinstall/update, or cancel.
+
+Before installing, it checks dependencies and prints install links if something
+is missing.
 
 The installer keeps the console open and writes a log to `artifacts\install.log`.
 
@@ -55,8 +64,9 @@ The installer:
 
 - Windows 11.
 - Local administrator rights for trusting the dev certificate and installing the package.
-- Visual Studio 2022 Build Tools or Visual Studio with C++ desktop workload.
-- Windows 10/11 SDK with `MakeAppx.exe` and `SignTool.exe`.
+- [Codex Desktop](https://apps.microsoft.com/detail/9plm9xgg6vks).
+- [Visual Studio Build Tools for C++](https://visualstudio.microsoft.com/visual-cpp-build-tools/) or Visual Studio with C++ desktop workload.
+- [Windows SDK](https://developer.microsoft.com/windows/downloads/windows-sdk/) with `MakeAppx.exe` and `SignTool.exe`.
 - PowerShell 5.1 or newer.
 
 ## Notes
